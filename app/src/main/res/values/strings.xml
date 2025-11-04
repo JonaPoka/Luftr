@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Luftr</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_workouts">Workouts</string>
+    <string name="nav_ai_planner">AI Planner</string>
+    <string name="nav_history">History</string>
+    
+    <!-- Home Screen -->
+    <string name="welcome_message">Welcome to Luftr</string>
+    <string name="start_workout">Start Workout</string>
+    <string name="create_ai_workout">Create AI Workout</string>
+    <string name="view_history">View History</string>
+    <string name="recent_workouts">Recent Workouts</string>
+    
+    <!-- Workout Screen -->
+    <string name="workout_name">Workout Name</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="save_workout">Save Workout</string>
+    <string name="finish_workout">Finish Workout</string>
+    <string name="exercise">Exercise</string>
+    <string name="sets">Sets</string>
+    <string name="reps">Reps</string>
+    <string name="weight">Weight</string>
+    <string name="add_set">Add Set</string>
+    <string name="remove_set">Remove Set</string>
+    
+    <!-- AI Planner -->
+    <string name="ai_workout_planner">AI Workout Planner</string>
+    <string name="create_custom_workout">Create Your Custom Workout</string>
+    <string name="fitness_goal">What\'s your fitness goal?</string>
+    <string name="goal_muscle_gain">Build Muscle</string>
+    <string name="goal_lose_weight">Lose Weight</string>
+    <string name="goal_strength">Get Stronger</string>
+    <string name="goal_endurance">Improve Endurance</string>
+    <string name="experience_level">What\'s your experience level?</string>
+    <string name="level_beginner">Beginner</string>
+    <string name="level_intermediate">Intermediate</string>
+    <string name="level_advanced">Advanced</string>
+    <string name="workout_duration">Preferred workout duration?</string>
+    <string name="duration_30">30 minutes</string>
+    <string name="duration_45">45 minutes</string>
+    <string name="duration_60">60 minutes</string>
+    <string name="duration_90">90+ minutes</string>
+    <string name="target_muscles">Target muscle groups</string>
+    <string name="muscle_chest">Chest</string>
+    <string name="muscle_back">Back</string>
+    <string name="muscle_legs">Legs</string>
+    <string name="muscle_shoulders">Shoulders</string>
+    <string name="muscle_arms">Arms</string>
+    <string name="muscle_core">Core</string>
+    <string name="generate_workout">Generate Workout</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    
+    <!-- History -->
+    <string name="workout_history">Workout History</string>
+    <string name="no_workouts">No workouts yet</string>
+    <string name="total_workouts">Total Workouts</string>
+    <string name="total_exercises">Total Exercises</string>
+    <string name="delete">Delete</string>
+    
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="edit">Edit</string>
+    <string name="done">Done</string>
+    <string name="kg">kg</string>
+    <string name="lbs">lbs</string>
+</resources>
