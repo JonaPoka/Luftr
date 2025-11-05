@@ -16,15 +16,10 @@ data class ExerciseDbExercise(
 
 interface ExerciseDbApiService {
     @GET("exercises")
-    suspend fun getAllExercises(
-        @retrofit2.http.Header("X-RapidAPI-Key") apiKey: String,
-        @retrofit2.http.Header("X-RapidAPI-Host") host: String = "exercisedb.p.rapidapi.com"
-    ): List<ExerciseDbExercise>
+    suspend fun getAllExercises(): List<ExerciseDbExercise>
     
     @GET("exercises/name/{name}")
     suspend fun searchExerciseByName(
-        @Path("name") name: String,
-        @retrofit2.http.Header("X-RapidAPI-Key") apiKey: String,
-        @retrofit2.http.Header("X-RapidAPI-Host") host: String = "exercisedb.p.rapidapi.com"
+        @Path("name") name: String
     ): List<ExerciseDbExercise>
 }
