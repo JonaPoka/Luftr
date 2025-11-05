@@ -21,5 +21,8 @@ data class Exercise(
     val workoutId: Long,
     val name: String,
     val muscleGroup: String,
-    val order: Int = 0
+    val order: Int = 0,
+    val imageUrl: String? = null,
+    val gifUrl: String? = null,
+    val instructions: String? = null
 )
