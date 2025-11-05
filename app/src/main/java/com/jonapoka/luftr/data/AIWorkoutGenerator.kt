@@ -122,7 +122,7 @@ object AIWorkoutGenerator {
         return parseWorkoutFromJson(content)
     }
     
-    private fun parseWorkoutFromJson(jsonString: String): WorkoutPlan {
+    private suspend fun parseWorkoutFromJson(jsonString: String): WorkoutPlan {
         // Clean up the JSON string (remove markdown code blocks if present)
         val cleanJson = jsonString
             .replace("```json", "")
@@ -136,13 +136,25 @@ object AIWorkoutGenerator {
         val exercises = mutableListOf<PlannedExercise>()
         for (i in 0 until exercisesArray.length()) {
             val exerciseObj = exercisesArray.getJSONObject(i)
+            val exerciseName = exerciseObj.getString("name")
+            
+            // Fetch exercise media
+            val media = try {
+                ExerciseMediaFetcher.fetchExerciseMedia(exerciseName)
+            } catch (e: Exception) {
+                ExerciseMedia(null, null, null)
+            }
+            
             exercises.add(
                 PlannedExercise(
-                    name = exerciseObj.getString("name"),
+                    name = exerciseName,
                     muscleGroup = exerciseObj.getString("muscleGroup"),
                     sets = exerciseObj.getInt("sets"),
                     reps = exerciseObj.getInt("reps"),
-                    restTime = exerciseObj.optInt("restTime", 60)
+                    restTime = exerciseObj.optInt("restTime", 60),
+                    imageUrl = media.imageUrl,
+                    gifUrl = media.gifUrl,
+                    instructions = media.instructions
                 )
             )
         }
@@ -153,7 +165,7 @@ object AIWorkoutGenerator {
         )
     }
     
-    private fun generateWorkoutLocally(
+    private suspend fun generateWorkoutLocally(
         goal: String,
         experienceLevel: String,
         duration: String,
@@ -184,13 +196,23 @@ object AIWorkoutGenerator {
         selectedMuscles.forEach { muscle ->
             val muscleExercises = exerciseDatabase[muscle] ?: emptyList()
             muscleExercises.shuffled().take(exercisesPerMuscle).forEach { exerciseName ->
+                // Fetch exercise media
+                val media = try {
+                    ExerciseMediaFetcher.fetchExerciseMedia(exerciseName)
+                } catch (e: Exception) {
+                    ExerciseMedia(null, null, null)
+                }
+                
                 exercises.add(
                     PlannedExercise(
                         name = exerciseName,
                         muscleGroup = muscle,
                         sets = sets,
                         reps = reps,
-                        restTime = getRestTime(goal, experienceLevel)
+                        restTime = getRestTime(goal, experienceLevel),
+                        imageUrl = media.imageUrl,
+                        gifUrl = media.gifUrl,
+                        instructions = media.instructions
                     )
                 )
             }
@@ -201,13 +223,23 @@ object AIWorkoutGenerator {
             val randomMuscle = selectedMuscles.random()
             val randomExercise = exerciseDatabase[randomMuscle]?.random()
             if (randomExercise != null && exercises.none { it.name == randomExercise }) {
+                // Fetch exercise media
+                val media = try {
+                    ExerciseMediaFetcher.fetchExerciseMedia(randomExercise)
+                } catch (e: Exception) {
+                    ExerciseMedia(null, null, null)
+                }
+                
                 exercises.add(
                     PlannedExercise(
                         name = randomExercise,
                         muscleGroup = randomMuscle,
                         sets = sets,
                         reps = reps,
-                        restTime = getRestTime(goal, experienceLevel)
+                        restTime = getRestTime(goal, experienceLevel),
+                        imageUrl = media.imageUrl,
+                        gifUrl = media.gifUrl,
+                        instructions = media.instructions
                     )
                 )
             }
