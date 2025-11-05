@@ -20,6 +20,7 @@ import com.jonapoka.luftr.data.entities.ExerciseWithSets
 import com.jonapoka.luftr.ui.components.ExerciseImageCard
 import com.jonapoka.luftr.ui.components.ExerciseAlternativesDialog
 import com.jonapoka.luftr.ui.components.ExerciseGuidanceCard
+import com.jonapoka.luftr.ui.components.AICoachingIntro
 import com.jonapoka.luftr.viewmodel.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,38 +31,48 @@ fun ActiveWorkoutScreen(
     onNavigateBack: () -> Unit
 ) {
     val exercises by viewModel.currentExercises.collectAsState()
+    val currentWorkout by viewModel.currentWorkout.collectAsState()
     var showAddExerciseDialog by remember { mutableStateOf(false) }
     var showFinishDialog by remember { mutableStateOf(false) }
+    var showAICoachingIntro by remember { mutableStateOf(false) }
 
     LaunchedEffect(workoutId) {
         viewModel.loadWorkout(workoutId)
     }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.exercise)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showFinishDialog = true }) {
-                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.finish_workout))
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddExerciseDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercise))
-            }
+    
+    // Show AI coaching intro for AI-generated workouts on first load
+    LaunchedEffect(currentWorkout, exercises) {
+        if (currentWorkout?.isAiGenerated == true && exercises.isNotEmpty() && !showAICoachingIntro) {
+            showAICoachingIntro = true
         }
-    ) { padding ->
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.exercise)) },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { showFinishDialog = true }) {
+                            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.finish_workout))
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { showAddExerciseDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercise))
+                }
+            }
+        ) { padding ->
         if (exercises.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -154,6 +165,15 @@ fun ActiveWorkoutScreen(
                 }
             )
         }
+        }
+        
+        // Show AI Coaching Intro overlay for AI workouts
+        if (showAICoachingIntro && exercises.isNotEmpty()) {
+            AICoachingIntro(
+                exercises = exercises,
+                onDismiss = { showAICoachingIntro = false }
+            )
+        }
     }
 }
 
@@ -171,16 +191,15 @@ fun ExerciseCard(
     var showAlternativesDialog by remember { mutableStateOf(false) }
     var showSkipConfirmDialog by remember { mutableStateOf(false) }
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(20.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
