@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.jonapoka.luftr.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.jonapoka.luftr.R
 import com.jonapoka.luftr.data.entities.ExerciseSet
 import com.jonapoka.luftr.data.entities.ExerciseWithSets
+import com.jonapoka.luftr.ui.components.ExerciseImageCard
 import com.jonapoka.luftr.viewmodel.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,6 +151,7 @@ fun ExerciseCard(
     onDeleteSet: (ExerciseSet) -> Unit
 ) {
     var showAddSetDialog by remember { mutableStateOf(false) }
+    var showInstructions by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -165,7 +169,7 @@ fun ExerciseCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = exerciseWithSets.exercise.name,
                         style = MaterialTheme.typography.titleMedium,
@@ -175,6 +179,45 @@ fun ExerciseCard(
                         text = exerciseWithSets.exercise.muscleGroup,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                // Show info icon if instructions are available
+                if (!exerciseWithSets.exercise.instructions.isNullOrBlank()) {
+                    IconButton(onClick = { showInstructions = !showInstructions }) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Instructions",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+            
+            // Show exercise image/gif if available
+            if (!exerciseWithSets.exercise.imageUrl.isNullOrBlank() || !exerciseWithSets.exercise.gifUrl.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                ExerciseImageCard(
+                    imageUrl = exerciseWithSets.exercise.imageUrl,
+                    gifUrl = exerciseWithSets.exercise.gifUrl,
+                    exerciseName = exerciseWithSets.exercise.name,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
+            // Show instructions if expanded
+            if (showInstructions && !exerciseWithSets.exercise.instructions.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Text(
+                        text = exerciseWithSets.exercise.instructions!!,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
             }

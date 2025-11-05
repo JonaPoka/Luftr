@@ -1,7 +1,14 @@
 package com.jonapoka.luftr.data
 
+import com.jonapoka.luftr.data.api.ApiClient
+import com.jonapoka.luftr.data.api.GroqMessage
+import com.jonapoka.luftr.data.api.GroqRequest
 import com.jonapoka.luftr.data.entities.Exercise
 import com.jonapoka.luftr.data.entities.ExerciseSet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 
 data class WorkoutPlan(
     val name: String,
@@ -13,7 +20,10 @@ data class PlannedExercise(
     val muscleGroup: String,
     val sets: Int,
     val reps: Int,
-    val restTime: Int = 60
+    val restTime: Int = 60,
+    val imageUrl: String? = null,
+    val gifUrl: String? = null,
+    val instructions: String? = null
 )
 
 object AIWorkoutGenerator {
@@ -45,7 +55,117 @@ object AIWorkoutGenerator {
         )
     )
 
-    fun generateWorkout(
+    suspend fun generateWorkout(
+        goal: String,
+        experienceLevel: String,
+        duration: String,
+        targetMuscles: List<String>
+    ): WorkoutPlan = withContext(Dispatchers.IO) {
+        try {
+            // Try to use Groq API for AI-powered workout generation
+            generateWorkoutWithGroq(goal, experienceLevel, duration, targetMuscles)
+        } catch (e: Exception) {
+            // Fallback to local generation if API fails
+            generateWorkoutLocally(goal, experienceLevel, duration, targetMuscles)
+        }
+    }
+    
+    private suspend fun generateWorkoutWithGroq(
+        goal: String,
+        experienceLevel: String,
+        duration: String,
+        targetMuscles: List<String>
+    ): WorkoutPlan {
+        val musclesStr = if (targetMuscles.isEmpty()) "full body" else targetMuscles.joinToString(", ")
+        
+        val prompt = """
+            Generate a workout plan with the following requirements:
+            - Goal: $goal
+            - Experience Level: $experienceLevel
+            - Duration: $duration
+            - Target Muscles: $musclesStr
+            
+            Return ONLY a valid JSON object (no markdown, no code blocks) with this exact structure:
+            {
+              "workoutName": "Workout Name",
+              "exercises": [
+                {
+                  "name": "Exercise Name",
+                  "muscleGroup": "Muscle Group",
+                  "sets": 3,
+                  "reps": 12,
+                  "restTime": 60
+                }
+              ]
+            }
+            
+            Select 4-10 exercises based on the duration. Use proper exercise names.
+        """.trimIndent()
+        
+        val request = GroqRequest(
+            messages = listOf(
+                GroqMessage(role = "system", content = "You are a professional fitness trainer. Always respond with valid JSON only."),
+                GroqMessage(role = "user", content = prompt)
+            ),
+            temperature = 0.7f,
+            max_tokens = 2048
+        )
+        
+        val response = ApiClient.groqApi.createChatCompletion(
+            authorization = "Bearer ${ApiClient.GROQ_API_KEY}",
+            request = request
+        )
+        
+        val content = response.choices.firstOrNull()?.message?.content 
+            ?: throw Exception("No response from Groq API")
+        
+        return parseWorkoutFromJson(content)
+    }
+    
+    private suspend fun parseWorkoutFromJson(jsonString: String): WorkoutPlan {
+        // Clean up the JSON string (remove markdown code blocks if present)
+        val cleanJson = jsonString
+            .replace("```json", "")
+            .replace("```", "")
+            .trim()
+        
+        val json = JSONObject(cleanJson)
+        val workoutName = json.getString("workoutName")
+        val exercisesArray = json.getJSONArray("exercises")
+        
+        val exercises = mutableListOf<PlannedExercise>()
+        for (i in 0 until exercisesArray.length()) {
+            val exerciseObj = exercisesArray.getJSONObject(i)
+            val exerciseName = exerciseObj.getString("name")
+            
+            // Fetch exercise media
+            val media = try {
+                ExerciseMediaFetcher.fetchExerciseMedia(exerciseName)
+            } catch (e: Exception) {
+                ExerciseMedia(null, null, null)
+            }
+            
+            exercises.add(
+                PlannedExercise(
+                    name = exerciseName,
+                    muscleGroup = exerciseObj.getString("muscleGroup"),
+                    sets = exerciseObj.getInt("sets"),
+                    reps = exerciseObj.getInt("reps"),
+                    restTime = exerciseObj.optInt("restTime", 60),
+                    imageUrl = media.imageUrl,
+                    gifUrl = media.gifUrl,
+                    instructions = media.instructions
+                )
+            )
+        }
+        
+        return WorkoutPlan(
+            name = workoutName,
+            exercises = exercises
+        )
+    }
+    
+    private suspend fun generateWorkoutLocally(
         goal: String,
         experienceLevel: String,
         duration: String,
@@ -76,13 +196,23 @@ object AIWorkoutGenerator {
         selectedMuscles.forEach { muscle ->
             val muscleExercises = exerciseDatabase[muscle] ?: emptyList()
             muscleExercises.shuffled().take(exercisesPerMuscle).forEach { exerciseName ->
+                // Fetch exercise media
+                val media = try {
+                    ExerciseMediaFetcher.fetchExerciseMedia(exerciseName)
+                } catch (e: Exception) {
+                    ExerciseMedia(null, null, null)
+                }
+                
                 exercises.add(
                     PlannedExercise(
                         name = exerciseName,
                         muscleGroup = muscle,
                         sets = sets,
                         reps = reps,
-                        restTime = getRestTime(goal, experienceLevel)
+                        restTime = getRestTime(goal, experienceLevel),
+                        imageUrl = media.imageUrl,
+                        gifUrl = media.gifUrl,
+                        instructions = media.instructions
                     )
                 )
             }
@@ -93,13 +223,23 @@ object AIWorkoutGenerator {
             val randomMuscle = selectedMuscles.random()
             val randomExercise = exerciseDatabase[randomMuscle]?.random()
             if (randomExercise != null && exercises.none { it.name == randomExercise }) {
+                // Fetch exercise media
+                val media = try {
+                    ExerciseMediaFetcher.fetchExerciseMedia(randomExercise)
+                } catch (e: Exception) {
+                    ExerciseMedia(null, null, null)
+                }
+                
                 exercises.add(
                     PlannedExercise(
                         name = randomExercise,
                         muscleGroup = randomMuscle,
                         sets = sets,
                         reps = reps,
-                        restTime = getRestTime(goal, experienceLevel)
+                        restTime = getRestTime(goal, experienceLevel),
+                        imageUrl = media.imageUrl,
+                        gifUrl = media.gifUrl,
+                        instructions = media.instructions
                     )
                 )
             }

@@ -17,7 +17,7 @@ import com.jonapoka.luftr.data.entities.Workout
         Exercise::class,
         ExerciseSet::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LuftrDatabase : RoomDatabase() {
@@ -35,7 +35,9 @@ abstract class LuftrDatabase : RoomDatabase() {
                     context.applicationContext,
                     LuftrDatabase::class.java,
                     "luftr_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // Allow schema changes during development
+                .build()
                 INSTANCE = instance
                 instance
             }

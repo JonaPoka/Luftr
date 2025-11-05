@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.jonapoka.luftr.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -52,6 +54,9 @@ fun HistoryScreen(
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
                 )
             ) {
                 Row(

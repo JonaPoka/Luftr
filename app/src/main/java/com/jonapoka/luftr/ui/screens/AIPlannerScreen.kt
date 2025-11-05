@@ -1,10 +1,12 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.jonapoka.luftr.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -53,11 +55,38 @@ fun AIPlannerScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Progress indicator
-            LinearProgressIndicator(
-                progress = (currentStep + 1) / 4f,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Progress indicator with step labels
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Step ${currentStep + 1} of 4",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = when (currentStep) {
+                            0 -> "Goal"
+                            1 -> "Level"
+                            2 -> "Duration"
+                            else -> "Muscles"
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = (currentStep + 1) / 4f,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -116,27 +145,35 @@ fun AIPlannerScreen(
                         onClick = {
                             isGenerating = true
                             scope.launch {
-                                val workoutPlan = AIWorkoutGenerator.generateWorkout(
-                                    goal = selectedGoal,
-                                    experienceLevel = selectedLevel,
-                                    duration = selectedDuration,
-                                    targetMuscles = selectedMuscles.toList()
-                                )
+                                try {
+                                    val workoutPlan = AIWorkoutGenerator.generateWorkout(
+                                        goal = selectedGoal,
+                                        experienceLevel = selectedLevel,
+                                        duration = selectedDuration,
+                                        targetMuscles = selectedMuscles.toList()
+                                    )
 
-                                viewModel.createWorkout(workoutPlan.name, isAiGenerated = true) { workoutId ->
-                                    // Add exercises
-                                    val exercises = workoutPlan.exercises.mapIndexed { index, planned ->
-                                        Exercise(
-                                            workoutId = workoutId,
-                                            name = planned.name,
-                                            muscleGroup = planned.muscleGroup,
-                                            order = index
-                                        )
+                                    viewModel.createWorkout(workoutPlan.name, isAiGenerated = true) { workoutId ->
+                                        // Add exercises with media
+                                        val exercises = workoutPlan.exercises.map { planned ->
+                                            Exercise(
+                                                workoutId = workoutId,
+                                                name = planned.name,
+                                                muscleGroup = planned.muscleGroup,
+                                                order = workoutPlan.exercises.indexOf(planned),
+                                                imageUrl = planned.imageUrl,
+                                                gifUrl = planned.gifUrl,
+                                                instructions = planned.instructions
+                                            )
+                                        }
+                                        viewModel.addExercises(workoutId, exercises)
+
+                                        isGenerating = false
+                                        onWorkoutGenerated(workoutId)
                                     }
-                                    viewModel.addExercises(workoutId, exercises)
-
+                                } catch (e: Exception) {
                                     isGenerating = false
-                                    onWorkoutGenerated(workoutId)
+                                    // Handle error - could show a snackbar here
                                 }
                             }
                         },
@@ -311,17 +348,22 @@ fun SelectionCard(
             } else {
                 MaterialTheme.colorScheme.surfaceVariant
             }
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 6.dp else 2.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = if (isSelected) {
                     MaterialTheme.colorScheme.onPrimaryContainer
                 } else {
@@ -330,8 +372,8 @@ fun SelectionCard(
             )
             if (isSelected) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
