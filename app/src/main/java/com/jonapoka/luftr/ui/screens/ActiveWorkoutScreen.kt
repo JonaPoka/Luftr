@@ -19,6 +19,7 @@ import com.jonapoka.luftr.data.entities.ExerciseSet
 import com.jonapoka.luftr.data.entities.ExerciseWithSets
 import com.jonapoka.luftr.ui.components.ExerciseImageCard
 import com.jonapoka.luftr.ui.components.ExerciseAlternativesDialog
+import com.jonapoka.luftr.ui.components.ExerciseGuidanceCard
 import com.jonapoka.luftr.viewmodel.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -222,21 +223,14 @@ fun ExerciseCard(
                 )
             }
             
-            // Show instructions if expanded
-            if (showInstructions && !exerciseWithSets.exercise.instructions.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Text(
-                        text = exerciseWithSets.exercise.instructions!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
+            // Show AI guidance when info button is clicked
+            if (showInstructions) {
+                Spacer(modifier = Modifier.height(12.dp))
+                ExerciseGuidanceCard(
+                    exerciseName = exerciseWithSets.exercise.name,
+                    goal = "Build Muscle", // Default goal, could be stored with workout
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             if (exerciseWithSets.sets.isNotEmpty()) {
