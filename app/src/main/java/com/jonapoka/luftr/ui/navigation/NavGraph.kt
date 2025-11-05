@@ -53,7 +53,7 @@ fun NavGraph(
         }
 
         composable(Screen.AIPlanner.route) {
-            AIPlannerScreen(
+            ChatAIPlannerScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onWorkoutGenerated = { workoutId ->
