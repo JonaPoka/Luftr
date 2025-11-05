@@ -2,44 +2,44 @@ package com.jonapoka.luftr.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Sleek Dark Theme Colors - Modern Fitness App
-// Primary: Vibrant Electric Blue for energy and motivation
-val dark_theme_primary = Color(0xFF00D9FF)
-val dark_theme_onPrimary = Color(0xFF003544)
-val dark_theme_primaryContainer = Color(0xFF004D62)
-val dark_theme_onPrimaryContainer = Color(0xFFB3EDFF)
+// Modern Dark Theme Colors - Sophisticated & Clean
+// Primary: Refined cyan-blue for a modern, tech-forward aesthetic
+val dark_theme_primary = Color(0xFF00E5FF)
+val dark_theme_onPrimary = Color(0xFF00131A)
+val dark_theme_primaryContainer = Color(0xFF004D5C)
+val dark_theme_onPrimaryContainer = Color(0xFFB8EEFF)
 
-// Secondary: Energetic Purple for accents
-val dark_theme_secondary = Color(0xFF9D4EDD)
-val dark_theme_onSecondary = Color(0xFF2B0A3D)
-val dark_theme_secondaryContainer = Color(0xFF5A1E7D)
-val dark_theme_onSecondaryContainer = Color(0xFFE4C3FF)
+// Secondary: Elegant indigo for premium feel
+val dark_theme_secondary = Color(0xFF8B7FFF)
+val dark_theme_onSecondary = Color(0xFF1A0F3D)
+val dark_theme_secondaryContainer = Color(0xFF3D2F8F)
+val dark_theme_onSecondaryContainer = Color(0xFFDDD8FF)
 
-// Tertiary: Warm accent for highlights
-val dark_theme_tertiary = Color(0xFFFF6B6B)
-val dark_theme_onTertiary = Color(0xFF4A0000)
-val dark_theme_tertiaryContainer = Color(0xFF8B0000)
-val dark_theme_onTertiaryContainer = Color(0xFFFFDAD6)
+// Tertiary: Refined coral accent for warmth
+val dark_theme_tertiary = Color(0xFFFF6E6E)
+val dark_theme_onTertiary = Color(0xFF3D0000)
+val dark_theme_tertiaryContainer = Color(0xFF6B0000)
+val dark_theme_onTertiaryContainer = Color(0xFFFFD9D6)
 
-// Error colors
-val dark_theme_error = Color(0xFFFF5252)
-val dark_theme_onError = Color(0xFF690005)
-val dark_theme_errorContainer = Color(0xFF93000A)
-val dark_theme_onErrorContainer = Color(0xFFFFDAD6)
+// Error colors - clean and visible
+val dark_theme_error = Color(0xFFFF5449)
+val dark_theme_onError = Color(0xFF5F0000)
+val dark_theme_errorContainer = Color(0xFF8C0000)
+val dark_theme_onErrorContainer = Color(0xFFFFD9D6)
 
-// Deep dark backgrounds for sleek appearance
-val dark_theme_background = Color(0xFF0A0E1A)
-val dark_theme_onBackground = Color(0xFFE8E8E8)
-val dark_theme_surface = Color(0xFF121824)
-val dark_theme_onSurface = Color(0xFFE8E8E8)
-val dark_theme_surfaceVariant = Color(0xFF1E2536)
-val dark_theme_onSurfaceVariant = Color(0xFFC2C7D0)
-val dark_theme_outline = Color(0xFF3D4556)
-val dark_theme_outlineVariant = Color(0xFF2A2F3E)
+// Ultra-modern dark backgrounds with rich blacks
+val dark_theme_background = Color(0xFF0B0E14)
+val dark_theme_onBackground = Color(0xFFECEFF1)
+val dark_theme_surface = Color(0xFF14181F)
+val dark_theme_onSurface = Color(0xFFECEFF1)
+val dark_theme_surfaceVariant = Color(0xFF1E242C)
+val dark_theme_onSurfaceVariant = Color(0xFFCAD0D8)
+val dark_theme_outline = Color(0xFF3D4654)
+val dark_theme_outlineVariant = Color(0xFF252C38)
 
 // Additional custom colors for fitness UI
-val dark_theme_success = Color(0xFF4CAF50)
-val dark_theme_warning = Color(0xFFFFA726)
+val dark_theme_success = Color(0xFF4ADE80)
+val dark_theme_warning = Color(0xFFFBBF24)
 
 // Light theme colors (kept for compatibility but app will default to dark)
 val md_theme_light_primary = Color(0xFF006780)
