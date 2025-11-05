@@ -94,6 +94,34 @@ class WorkoutViewModel(
             repository.deleteExercise(exercise)
         }
     }
+    
+    fun deleteExercise(exerciseId: Long) {
+        viewModelScope.launch {
+            val exercise = _currentExercises.value
+                .find { it.exercise.id == exerciseId }
+                ?.exercise
+            exercise?.let {
+                repository.deleteExercise(it)
+            }
+        }
+    }
+    
+    fun replaceExercise(exerciseId: Long, newName: String, muscleGroup: String) {
+        viewModelScope.launch {
+            val currentExercise = _currentExercises.value
+                .find { it.exercise.id == exerciseId }
+                ?.exercise
+            
+            currentExercise?.let { exercise ->
+                // Update the exercise name, keeping the same order and workout
+                val updatedExercise = exercise.copy(
+                    name = newName,
+                    muscleGroup = muscleGroup
+                )
+                repository.updateExercise(updatedExercise)
+            }
+        }
+    }
 
     fun deleteWorkout(workout: Workout) {
         viewModelScope.launch {

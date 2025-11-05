@@ -18,6 +18,8 @@ import com.jonapoka.luftr.R
 import com.jonapoka.luftr.data.entities.ExerciseSet
 import com.jonapoka.luftr.data.entities.ExerciseWithSets
 import com.jonapoka.luftr.ui.components.ExerciseImageCard
+import com.jonapoka.luftr.ui.components.ExerciseAlternativesDialog
+import com.jonapoka.luftr.ui.components.ExerciseGuidanceCard
 import com.jonapoka.luftr.viewmodel.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +101,19 @@ fun ActiveWorkoutScreen(
                             viewModel.addSet(exerciseWithSets.exercise.id, reps, weight)
                         },
                         onUpdateSet = { set -> viewModel.updateSet(set) },
-                        onDeleteSet = { set -> viewModel.deleteSet(set) }
+                        onDeleteSet = { set -> viewModel.deleteSet(set) },
+                        onSkipExercise = {
+                            // Mark exercise as skipped by deleting it
+                            viewModel.deleteExercise(exerciseWithSets.exercise.id)
+                        },
+                        onSwitchExercise = { newExerciseName ->
+                            // Replace the exercise
+                            viewModel.replaceExercise(
+                                exerciseWithSets.exercise.id,
+                                newExerciseName,
+                                exerciseWithSets.exercise.muscleGroup
+                            )
+                        }
                     )
                 }
                 
@@ -148,10 +162,14 @@ fun ExerciseCard(
     exerciseWithSets: ExerciseWithSets,
     onAddSet: (Int, Float) -> Unit,
     onUpdateSet: (ExerciseSet) -> Unit,
-    onDeleteSet: (ExerciseSet) -> Unit
+    onDeleteSet: (ExerciseSet) -> Unit,
+    onSkipExercise: () -> Unit = {},
+    onSwitchExercise: (String) -> Unit = {}
 ) {
     var showAddSetDialog by remember { mutableStateOf(false) }
     var showInstructions by remember { mutableStateOf(false) }
+    var showAlternativesDialog by remember { mutableStateOf(false) }
+    var showSkipConfirmDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -205,21 +223,14 @@ fun ExerciseCard(
                 )
             }
             
-            // Show instructions if expanded
-            if (showInstructions && !exerciseWithSets.exercise.instructions.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Text(
-                        text = exerciseWithSets.exercise.instructions!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
+            // Show AI guidance when info button is clicked
+            if (showInstructions) {
+                Spacer(modifier = Modifier.height(12.dp))
+                ExerciseGuidanceCard(
+                    exerciseName = exerciseWithSets.exercise.name,
+                    goal = "Build Muscle", // Default goal, could be stored with workout
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             if (exerciseWithSets.sets.isNotEmpty()) {
@@ -271,6 +282,46 @@ fun ExerciseCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.add_set))
             }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Skip and Switch buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { showAlternativesDialog = true },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SwapHoriz,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Switch")
+                }
+                
+                OutlinedButton(
+                    onClick = { showSkipConfirmDialog = true },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SkipNext,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Skip")
+                }
+            }
         }
     }
 
@@ -280,6 +331,52 @@ fun ExerciseCard(
             onAdd = { reps, weight ->
                 onAddSet(reps, weight)
                 showAddSetDialog = false
+            }
+        )
+    }
+    
+    if (showAlternativesDialog) {
+        ExerciseAlternativesDialog(
+            currentExerciseName = exerciseWithSets.exercise.name,
+            muscleGroup = exerciseWithSets.exercise.muscleGroup,
+            onDismiss = { showAlternativesDialog = false },
+            onSelectAlternative = { newName ->
+                onSwitchExercise(newName)
+            }
+        )
+    }
+    
+    if (showSkipConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showSkipConfirmDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+            },
+            title = { Text("Skip Exercise?") },
+            text = {
+                Text("Are you sure you want to skip ${exerciseWithSets.exercise.name}? The exercise will be removed from this workout.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onSkipExercise()
+                        showSkipConfirmDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Text("Skip")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSkipConfirmDialog = false }) {
+                    Text("Cancel")
+                }
             }
         )
     }
