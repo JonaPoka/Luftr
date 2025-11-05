@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -27,10 +28,11 @@ fun ChatMessageBubble(
     message: ChatMessage,
     modifier: Modifier = Modifier
 ) {
+    // ChatGPT-style: no bubbles, simple text aligned left for AI, right for user
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
             .animateContentSize(
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -40,76 +42,43 @@ fun ChatMessageBubble(
         horizontalArrangement = if (message.isFromTrainer) Arrangement.Start else Arrangement.End
     ) {
         if (message.isFromTrainer) {
-            // Trainer avatar
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.primary
+            // Trainer message - aligned left, no bubble
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                horizontalArrangement = Arrangement.Start
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.FitnessCenter,
-                        contentDescription = "Trainer",
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-        
-        // Message bubble
-        Surface(
-            shape = RoundedCornerShape(
-                topStart = if (message.isFromTrainer) 4.dp else 20.dp,
-                topEnd = if (message.isFromTrainer) 20.dp else 4.dp,
-                bottomStart = 20.dp,
-                bottomEnd = 20.dp
-            ),
-            color = if (message.isFromTrainer) {
-                MaterialTheme.colorScheme.surfaceVariant
-            } else {
-                MaterialTheme.colorScheme.primaryContainer
-            },
-            modifier = Modifier.widthIn(max = 280.dp)
-        ) {
-            if (message.isFromTrainer) {
+                // Small icon indicator
+                Icon(
+                    imageVector = Icons.Default.FitnessCenter,
+                    contentDescription = "Trainer",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .padding(top = 2.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                
                 // Animate trainer messages with fade-in effect
                 AnimatedAIText(
                     text = message.text,
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface
                     ),
-                    delayBetweenLines = 80L
-                )
-            } else {
-                // User messages appear instantly
-                Text(
-                    text = message.text,
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    delayBetweenLines = 50L
                 )
             }
-        }
-        
-        if (!message.isFromTrainer) {
-            Spacer(modifier = Modifier.width(8.dp))
-            // User indicator
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            // User message - aligned right, no bubble, lighter text
+            Column(
+                modifier = Modifier.fillMaxWidth(0.85f),
+                horizontalAlignment = Alignment.End
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "You",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
+                )
             }
         }
     }
@@ -122,27 +91,28 @@ fun ChatOptionButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    Button(
+    // Minimal design with outline
+    OutlinedButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 20.dp, vertical = 6.dp),
         enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.primary
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
-        )
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline
+        ),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 12.dp),
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Normal
         )
     }
 }
@@ -151,50 +121,34 @@ fun ChatOptionButton(
 fun TypingIndicator(
     modifier: Modifier = Modifier
 ) {
+    // Simple typing indicator without bubble
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.Start
     ) {
-        Surface(
-            modifier = Modifier.size(36.dp),
-            shape = RoundedCornerShape(18.dp),
-            color = MaterialTheme.colorScheme.primary
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.FitnessCenter,
-                    contentDescription = "Trainer",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.Default.FitnessCenter,
+            contentDescription = "Trainer",
+            modifier = Modifier
+                .size(20.dp)
+                .padding(top = 2.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(12.dp))
         
-        Surface(
-            shape = RoundedCornerShape(
-                topStart = 4.dp,
-                topEnd = 20.dp,
-                bottomStart = 20.dp,
-                bottomEnd = 20.dp
-            ),
-            color = MaterialTheme.colorScheme.surfaceVariant
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) { index ->
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                    )
-                }
+            repeat(3) { index ->
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+                )
             }
         }
     }

@@ -260,7 +260,7 @@ fun GoalOptions(onGoalSelected: (String) -> Unit) {
 
 @Composable
 fun ExperienceOptions(onLevelSelected: (String) -> Unit) {
-    Column {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
         ChatOptionButton("🌱 Beginner - Just starting out", onClick = { onLevelSelected("Beginner") })
         ChatOptionButton("🎯 Intermediate - Training regularly", onClick = { onLevelSelected("Intermediate") })
         ChatOptionButton("🔥 Advanced - Experienced lifter", onClick = { onLevelSelected("Advanced") })
@@ -269,7 +269,7 @@ fun ExperienceOptions(onLevelSelected: (String) -> Unit) {
 
 @Composable
 fun DurationOptions(onDurationSelected: (String) -> Unit) {
-    Column {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
         ChatOptionButton("⚡ 30 minutes - Quick session", onClick = { onDurationSelected("30 minutes") })
         ChatOptionButton("🎯 45 minutes - Standard workout", onClick = { onDurationSelected("45 minutes") })
         ChatOptionButton("💪 60 minutes - Full session", onClick = { onDurationSelected("60 minutes") })
@@ -283,7 +283,7 @@ fun MuscleGroupOptions(
     onMusclesChanged: (Set<String>) -> Unit,
     onConfirm: () -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
         val muscles = listOf(
             "💪 Chest" to "Chest",
             "🦾 Back" to "Back",
@@ -295,7 +295,7 @@ fun MuscleGroupOptions(
         
         muscles.forEach { (display, value) ->
             val isSelected = selectedMuscles.contains(value)
-            Button(
+            OutlinedButton(
                 onClick = {
                     val newSet = if (isSelected) {
                         selectedMuscles - value
@@ -306,32 +306,36 @@ fun MuscleGroupOptions(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant
+                        androidx.compose.ui.graphics.Color.Transparent
                     },
                     contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        MaterialTheme.colorScheme.onSurface
                     }
                 ),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                ),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = display,
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                     )
                     if (isSelected) {
                         Icon(
@@ -344,23 +348,23 @@ fun MuscleGroupOptions(
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         Button(
             onClick = onConfirm,
             enabled = selectedMuscles.isNotEmpty(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .height(56.dp)
+                .padding(horizontal = 20.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
         ) {
             Text(
                 text = if (selectedMuscles.isEmpty()) "Select at least one muscle group" else "Create My Workout 🚀",
-                modifier = Modifier.padding(vertical = 8.dp),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
         }

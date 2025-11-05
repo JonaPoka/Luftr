@@ -19,6 +19,9 @@ class WorkoutViewModel(
 
     private val _currentExercises = MutableStateFlow<List<ExerciseWithSets>>(emptyList())
     val currentExercises: StateFlow<List<ExerciseWithSets>> = _currentExercises.asStateFlow()
+    
+    private val _currentWorkout = MutableStateFlow<Workout?>(null)
+    val currentWorkout: StateFlow<Workout?> = _currentWorkout.asStateFlow()
 
     fun createWorkout(name: String, isAiGenerated: Boolean = false, onSuccess: (Long) -> Unit) {
         viewModelScope.launch {
@@ -35,6 +38,10 @@ class WorkoutViewModel(
     fun loadWorkout(workoutId: Long) {
         viewModelScope.launch {
             _currentWorkoutId.value = workoutId
+            // Load workout details
+            val workoutWithExercises = repository.getWorkoutWithExercises(workoutId)
+            _currentWorkout.value = workoutWithExercises?.workout
+            // Load exercises with sets
             repository.getExercisesWithSets(workoutId).collect { exercises ->
                 _currentExercises.value = exercises
             }
