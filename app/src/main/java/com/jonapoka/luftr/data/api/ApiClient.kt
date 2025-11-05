@@ -7,9 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    // Hardcoded API keys (will be updated later)
+    // Hardcoded API key for Groq API (will be updated later)
     const val GROQ_API_KEY = "gsk_placeholder_key_will_be_updated"
-    const val EXERCISEDB_API_KEY = "placeholder_rapidapi_key"
     
     private fun createOkHttpClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor()
