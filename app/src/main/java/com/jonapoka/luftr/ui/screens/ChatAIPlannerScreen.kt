@@ -224,8 +224,10 @@ fun ChatAIPlannerScreen(
                                                         currentStep = ChatStep.COMPLETE
                                                         addTrainerMessage("Your personalized workout is ready! 🎉\n\nI've created ${exercises.size} exercises targeting ${selectedMuscles.joinToString(", ")}.\n\nYou'll see each exercise with proper form guidance, and if any machine is taken, you can easily swap it out. Let's crush this workout!")
                                                         
-                                                        delay(1500)
-                                                        onWorkoutGenerated(workoutId)
+                                                        scope.launch {
+                                                            delay(1500)
+                                                            onWorkoutGenerated(workoutId)
+                                                        }
                                                     }
                                                 } catch (e: Exception) {
                                                     addTrainerMessage("Oops! Something went wrong. Let me try that again...")
