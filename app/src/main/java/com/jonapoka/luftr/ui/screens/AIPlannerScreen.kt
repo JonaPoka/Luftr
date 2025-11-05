@@ -55,11 +55,38 @@ fun AIPlannerScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Progress indicator
-            LinearProgressIndicator(
-                progress = (currentStep + 1) / 4f,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Progress indicator with step labels
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Step ${currentStep + 1} of 4",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = when (currentStep) {
+                            0 -> "Goal"
+                            1 -> "Level"
+                            2 -> "Duration"
+                            else -> "Muscles"
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = (currentStep + 1) / 4f,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
