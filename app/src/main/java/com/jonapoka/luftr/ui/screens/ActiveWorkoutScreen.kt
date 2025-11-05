@@ -35,15 +35,17 @@ fun ActiveWorkoutScreen(
     var showAddExerciseDialog by remember { mutableStateOf(false) }
     var showFinishDialog by remember { mutableStateOf(false) }
     var showAICoachingIntro by remember { mutableStateOf(false) }
+    var hasShownIntro by remember { mutableStateOf(false) }
 
     LaunchedEffect(workoutId) {
         viewModel.loadWorkout(workoutId)
     }
     
-    // Show AI coaching intro for AI-generated workouts on first load
-    LaunchedEffect(currentWorkout, exercises) {
-        if (currentWorkout?.isAiGenerated == true && exercises.isNotEmpty() && !showAICoachingIntro) {
+    // Show AI coaching intro for AI-generated workouts on first load only
+    LaunchedEffect(currentWorkout) {
+        if (currentWorkout?.isAiGenerated == true && exercises.isNotEmpty() && !hasShownIntro) {
             showAICoachingIntro = true
+            hasShownIntro = true
         }
     }
 

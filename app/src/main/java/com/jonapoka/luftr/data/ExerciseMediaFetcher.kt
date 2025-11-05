@@ -24,8 +24,7 @@ object ExerciseMediaFetcher {
             // Try to fetch from API
             val searchName = exerciseName.lowercase().replace(" ", "%20")
             val results = ApiClient.exerciseDbApi.searchExerciseByName(
-                name = searchName,
-                apiKey = ApiClient.EXERCISEDB_API_KEY
+                name = searchName
             )
             
             if (results.isNotEmpty()) {

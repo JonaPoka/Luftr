@@ -32,7 +32,7 @@ object ApiClient {
     
     private val exerciseDbRetrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("https://exercisedb.p.rapidapi.com/")
+            .baseUrl("https://exercisedb-ay2xecv6k-jonapokas-projects.vercel.app/")
             .client(createOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
