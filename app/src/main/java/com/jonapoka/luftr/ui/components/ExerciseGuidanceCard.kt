@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jonapoka.luftr.data.AIWorkoutGenerator
+import com.jonapoka.luftr.data.ExerciseGuidance
 import kotlinx.coroutines.launch
 
 @Composable
@@ -25,7 +26,7 @@ fun ExerciseGuidanceCard(
     var showFormTips by remember { mutableStateOf(false) }
     var showWhy by remember { mutableStateOf(false) }
     var showMistakes by remember { mutableStateOf(false) }
-    var guidance by remember { mutableStateOf<com.jonapoka.luftr.data.AIWorkoutGenerator.ExerciseGuidance?>(null) }
+    var guidance by remember { mutableStateOf<ExerciseGuidance?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     
     LaunchedEffect(exerciseName, goal) {

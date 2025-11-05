@@ -73,6 +73,7 @@ fun ExerciseAlternativesDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlternativeExerciseCard(
     alternative: ExerciseAlternative,
