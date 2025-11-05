@@ -313,7 +313,91 @@ object AIWorkoutGenerator {
         return "$musclesPart $goalPart"
     }
     
-    fun getExerciseGuidance(exerciseName: String, goal: String): ExerciseGuidance {
+    suspend fun getExerciseGuidance(exerciseName: String, goal: String): ExerciseGuidance = withContext(Dispatchers.IO) {
+        try {
+            // Try to get AI-generated guidance
+            getExerciseGuidanceFromAI(exerciseName, goal)
+        } catch (e: Exception) {
+            // Fallback to local guidance if API fails
+            getExerciseGuidanceLocally(exerciseName, goal)
+        }
+    }
+    
+    private suspend fun getExerciseGuidanceFromAI(exerciseName: String, goal: String): ExerciseGuidance {
+        val prompt = """
+            You are a professional personal trainer. Provide detailed guidance for the exercise "$exerciseName" for someone whose goal is to "$goal".
+            
+            Return ONLY a valid JSON object (no markdown, no code blocks) with this exact structure:
+            {
+              "formTips": [
+                "Tip 1 starting with an emoji like 🔹",
+                "Tip 2 starting with an emoji like 🔹",
+                "Tip 3 starting with an emoji like 🔹",
+                "Tip 4 starting with an emoji like 🔹",
+                "Tip 5 starting with an emoji like 🔹"
+              ],
+              "why": "A motivational 2-3 sentence explanation of why this exercise is great for their goal",
+              "commonMistakes": [
+                "Mistake 1 starting with ❌",
+                "Mistake 2 starting with ❌",
+                "Mistake 3 starting with ❌"
+              ]
+            }
+            
+            Be specific, motivational, and professional. Use simple, clear language.
+        """.trimIndent()
+        
+        val request = GroqRequest(
+            messages = listOf(
+                GroqMessage(role = "system", content = "You are a professional personal trainer providing exercise form advice. Always respond with valid JSON only."),
+                GroqMessage(role = "user", content = prompt)
+            ),
+            temperature = 0.7f,
+            max_tokens = 1024
+        )
+        
+        val response = ApiClient.groqApi.createChatCompletion(
+            authorization = "Bearer ${ApiClient.GROQ_API_KEY}",
+            request = request
+        )
+        
+        val content = response.choices.firstOrNull()?.message?.content 
+            ?: throw Exception("No response from Groq API")
+        
+        return parseGuidanceFromJson(content)
+    }
+    
+    private fun parseGuidanceFromJson(jsonString: String): ExerciseGuidance {
+        // Clean up the JSON string (remove markdown code blocks if present)
+        val cleanJson = jsonString
+            .replace("```json", "")
+            .replace("```", "")
+            .trim()
+        
+        val json = JSONObject(cleanJson)
+        
+        val formTipsArray = json.getJSONArray("formTips")
+        val formTips = mutableListOf<String>()
+        for (i in 0 until formTipsArray.length()) {
+            formTips.add(formTipsArray.getString(i))
+        }
+        
+        val why = json.getString("why")
+        
+        val mistakesArray = json.getJSONArray("commonMistakes")
+        val mistakes = mutableListOf<String>()
+        for (i in 0 until mistakesArray.length()) {
+            mistakes.add(mistakesArray.getString(i))
+        }
+        
+        return ExerciseGuidance(
+            formTips = formTips,
+            why = why,
+            commonMistakes = mistakes
+        )
+    }
+    
+    private fun getExerciseGuidanceLocally(exerciseName: String, goal: String): ExerciseGuidance {
         val lowerName = exerciseName.lowercase()
         
         return when {

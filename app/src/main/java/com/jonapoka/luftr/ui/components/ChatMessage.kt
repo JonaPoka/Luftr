@@ -73,16 +73,25 @@ fun ChatMessageBubble(
             },
             modifier = Modifier.widthIn(max = 280.dp)
         ) {
-            Text(
-                text = message.text,
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (message.isFromTrainer) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                }
-            )
+            if (message.isFromTrainer) {
+                // Animate trainer messages with fade-in effect
+                AnimatedAIText(
+                    text = message.text,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    delayBetweenLines = 80L
+                )
+            } else {
+                // User messages appear instantly
+                Text(
+                    text = message.text,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
         
         if (!message.isFromTrainer) {

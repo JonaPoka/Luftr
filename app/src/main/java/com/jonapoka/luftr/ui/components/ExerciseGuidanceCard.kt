@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jonapoka.luftr.data.AIWorkoutGenerator
+import kotlinx.coroutines.launch
 
 @Composable
 fun ExerciseGuidanceCard(
@@ -24,9 +25,36 @@ fun ExerciseGuidanceCard(
     var showFormTips by remember { mutableStateOf(false) }
     var showWhy by remember { mutableStateOf(false) }
     var showMistakes by remember { mutableStateOf(false) }
+    var guidance by remember { mutableStateOf<com.jonapoka.luftr.data.AIWorkoutGenerator.ExerciseGuidance?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
     
-    val guidance = remember(exerciseName, goal) {
-        AIWorkoutGenerator.getExerciseGuidance(exerciseName, goal)
+    LaunchedEffect(exerciseName, goal) {
+        isLoading = true
+        guidance = AIWorkoutGenerator.getExerciseGuidance(exerciseName, goal)
+        isLoading = false
+    }
+    
+    if (isLoading || guidance == null) {
+        Card(
+            modifier = modifier,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        return
     }
     
     Card(
@@ -57,14 +85,13 @@ fun ExerciseGuidanceCard(
                 expanded = showFormTips,
                 onToggle = { showFormTips = !showFormTips }
             ) {
-                guidance.formTips.forEach { tip ->
-                    Text(
-                        text = tip,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
-                }
+                AnimatedAITextList(
+                    items = guidance!!.formTips,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    delayBetweenItems = 80L
+                )
             }
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -76,10 +103,12 @@ fun ExerciseGuidanceCard(
                 expanded = showWhy,
                 onToggle = { showWhy = !showWhy }
             ) {
-                Text(
-                    text = guidance.why,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                AnimatedAIText(
+                    text = guidance!!.why,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    delayBetweenLines = 100L
                 )
             }
             
@@ -92,14 +121,13 @@ fun ExerciseGuidanceCard(
                 expanded = showMistakes,
                 onToggle = { showMistakes = !showMistakes }
             ) {
-                guidance.commonMistakes.forEach { mistake ->
-                    Text(
-                        text = mistake,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
-                }
+                AnimatedAITextList(
+                    items = guidance!!.commonMistakes,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    delayBetweenItems = 80L
+                )
             }
         }
     }
